@@ -105,13 +105,13 @@ export const getUserById = async (req, res) => {
   }
 };
 
-export const getProfile = async (req, res) => {
+export const getStudents = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    const students = await User.find({ role: "student" });
+    if (!students || students.length === 0) {
+      return res.status(404).json({ message: "No Students found" });
     }
-    res.status(200).json(user);
+    res.status(200).json(students);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -129,6 +129,58 @@ export const updateProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+export const getTeachers = async (req, res) => {
+  try {
+    const teachers = await User.find({ role: "teacher" });
+    if (!teachers || teachers.length === 0) {
+      return res.status(404).json({ message: "No teachers found" });
+    }
+    res.status(200).json(teachers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteTeacher = async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    console.log("Deleting teacher with ID:", teacherId);
+
+    const teacher = await User.findOneAndDelete({
+      _id: teacherId,
+      role: "teacher",
+    });
+
+    if (!teacher) {
+      return res.status(404).json({ message: "Teacher not found" });
+    }
+
+    res.status(200).json({ message: "Teacher deleted successfully" });
+  } catch (error) {
+    console.error("Delete teacher error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteStudent = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    console.log("Deleting student with ID:", studentId);
+
+    const student = await User.findOneAndDelete({
+      _id: studentId,
+      role: "student",
+    });
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.status(200).json({ message: "Student deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

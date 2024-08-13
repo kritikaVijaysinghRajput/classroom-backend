@@ -83,17 +83,19 @@ const assignTeacherToClassroom = async (req, res) => {
   try {
     const { classroomId, teacherId } = req.body;
 
+    const teachers = await User.findOne({ _id: teacherId });
+    if (!teachers || !teachers.role == "teacher") {
+      console.log("not found!");
+      return res.status(404).json({ message: "Teacher not not found here" });
+    }
+    console.log(teachers);
+
     const classroom = await Classroom.findById(classroomId);
     if (!classroom) {
       return res.status(404).json({ message: "Classroom not found" });
     }
 
-    const teacher = await User.findById(teacherId);
-    if (!teacher || !teacher.isTeacher) {
-      return res.status(404).json({ message: "Teacher not found" });
-    }
-
-    if (teacher.classroom) {
+    if (classroom.teacher == teachers) {
       return res
         .status(400)
         .json({ message: "Teacher is already assigned to a classroom" });
@@ -101,9 +103,6 @@ const assignTeacherToClassroom = async (req, res) => {
 
     classroom.teacher = teacherId;
     await classroom.save();
-
-    teacher.classroom = classroomId;
-    await teacher.save();
 
     res.status(200).json({
       message: "Teacher assigned to classroom successfully",
